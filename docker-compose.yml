@@ -1,0 +1,15 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    env_file:
+      - .env
+    environment:
+      # カスタムノードのディレクトリを指定
+      - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom-nodes
+    volumes:
+      - /c/n8n:/home/node/.n8n
+      # カスタムノード用ボリューム
+      - /c/n8n/nodes:/home/node/.n8n/custom-nodes
