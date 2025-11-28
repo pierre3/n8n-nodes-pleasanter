@@ -1,247 +1,238 @@
-![Banner image](https://user-images.githubusercontent.com/10284570/173569848-c624317f-42b1-45a6-ab09-f0ea3c247648.png)
+# n8n-nodes-pleasanter
 
-# n8n-nodes-starter
+[Pleasanter](https://pleasanter.org/) API と連携するための n8n カスタムノードです。
 
-This starter repository helps you build custom integrations for [n8n](https://n8n.io). It includes example nodes, credentials, the node linter, and all the tooling you need to get started.
+## 機能
 
-## Quick Start
+- **Get**: テーブルから単一または複数のレコードを取得
+- **Create**: 新しいレコードを作成
+- **Update**: 既存のレコードを更新
+- **Delete**: レコードを削除
 
-> [!TIP]
-> **New to building n8n nodes?** The fastest way to get started is with `npm create @n8n/node`. This command scaffolds a complete node package for you using the [@n8n/node-cli](https://www.npmjs.com/package/@n8n/node-cli).
+## インストール
 
-**To create a new node package from scratch:**
+### Docker環境での利用
 
-```bash
-npm create @n8n/node
+1. ビルド＆デプロイスクリプトを実行:
+
+```powershell
+cd custom-nodes/pleasanter-node
+.\deploy.ps1 -Restart
 ```
 
-**Already using this starter? Start developing with:**
+2. n8nコンテナが再起動され、カスタムノードが利用可能になります。
+
+### 手動インストール
 
 ```bash
-npm run dev
+cd custom-nodes/pleasanter-node
+npm install
+npm run build
 ```
 
-This starts n8n with your nodes loaded and hot reload enabled.
+ビルド成果物（`dist/` と `package.json`）を n8n のカスタムノードディレクトリにコピーしてください。
 
-## What's Included
+## 使い方
 
-This starter repository includes two example nodes to learn from:
+### 1. クレデンシャルの設定
 
-- **[Example Node](nodes/Example/)** - A simple starter node that shows the basic structure with a custom `execute` method
-- **[GitHub Issues Node](nodes/GithubIssues/)** - A complete, production-ready example built using the **declarative style**:
-  - **Low-code approach** - Define operations declaratively without writing request logic
-  - Multiple resources (Issues, Comments)
-  - Multiple operations (Get, Get All, Create)
-  - Two authentication methods (OAuth2 and Personal Access Token)
-  - List search functionality for dynamic dropdowns
-  - Proper error handling and typing
-  - Ideal for HTTP API-based integrations
+1. n8n で「Credentials」→「Add Credential」→「Pleasanter API」を選択
+2. 以下を設定:
+   - **Base URL**: Pleasanter サーバーの URL（例: `http://host.docker.internal:59803`）
+   - **API Key**: Pleasanter で発行した API キー
 
-> [!TIP]
-> The declarative/low-code style (used in GitHub Issues) is the recommended approach for building nodes that interact with HTTP APIs. It significantly reduces boilerplate code and handles requests automatically.
+> **Note**: Docker コンテナからホストPC上の Pleasanter にアクセスする場合は、`localhost` の代わりに `host.docker.internal` を使用してください。
 
-Browse these examples to understand both approaches, then modify them or create your own.
+### 2. ノードの使用
 
-## Finding Inspiration
+#### Get（レコード取得）
 
-Looking for more examples? Check out these resources:
+- **Site ID or Record ID**: テーブルの Site ID（複数レコード取得）または Record ID（単一レコード取得）
+- **View Options**: フィルター、ソート、検索条件などを指定
 
-- **[npm Community Nodes](https://www.npmjs.com/search?q=keywords:n8n-community-node-package)** - Browse thousands of community-built nodes on npm using the `n8n-community-node-package` tag
-- **[n8n Built-in Nodes](https://github.com/n8n-io/n8n/tree/master/packages/nodes-base/nodes)** - Study the source code of n8n's official nodes for production-ready patterns and best practices
-- **[n8n Credentials](https://github.com/n8n-io/n8n/tree/master/packages/nodes-base/credentials)** - See how authentication is implemented for various services
+#### Create（レコード作成）
 
-These are excellent resources to understand how to structure your nodes, handle different API patterns, and implement advanced features.
+- **Site ID**: レコードを作成するテーブルの Site ID
+- **Fields**: Title, Body, ClassHash, NumHash などのフィールド値
 
-## Prerequisites
+#### Update（レコード更新）
 
-Before you begin, install the following on your development machine:
+- **Record ID**: 更新するレコードの ID
+- **Fields**: 更新するフィールド値
 
-### Required
+#### Delete（レコード削除）
 
-- **[Node.js](https://nodejs.org/)** (v22 or higher) and npm
-  - Linux/Mac/WSL: Install via [nvm](https://github.com/nvm-sh/nvm)
-  - Windows: Follow [Microsoft's NodeJS guide](https://learn.microsoft.com/en-us/windows/dev-environment/javascript/nodejs-on-windows)
-- **[git](https://git-scm.com/downloads)**
+- **Record ID**: 削除するレコードの ID
 
-### Recommended
+## 開発
 
-- Follow n8n's [development environment setup guide](https://docs.n8n.io/integrations/creating-nodes/build/node-development-environment/)
+### プロジェクト構成
 
-> [!NOTE]
-> The `@n8n/node-cli` is included as a dev dependency and will be installed automatically when you run `npm install`. The CLI includes n8n for local development, so you don't need to install n8n globally.
+```
+pleasanter-node/
+├── credentials/
+│   └── PleasanterApi.credentials.ts  # API認証情報の定義
+├── nodes/
+│   └── pleasanter/
+│       ├── Pleasanter.node.ts        # メインノードの実装
+│       └── pleasanter.svg            # アイコン
+├── dist/                             # ビルド成果物（.gitignore）
+├── package.json
+├── tsconfig.json
+└── deploy.ps1                        # デプロイスクリプト
+```
 
-## Getting Started with this Starter
+### カスタムノード作成手順
 
-Follow these steps to create your own n8n community node package:
-
-### 1. Create Your Repository
-
-[Generate a new repository](https://github.com/n8n-io/n8n-nodes-starter/generate) from this template, then clone it:
+#### 1. テンプレートリポジトリをクローン
 
 ```bash
-git clone https://github.com/<your-organization>/<your-repo-name>.git
-cd <your-repo-name>
+# n8n公式のスターターテンプレートをクローン
+git clone https://github.com/n8n-io/n8n-nodes-starter.git my-node-name
+cd my-node-name
+
+# 元のGit履歴を削除して新しいリポジトリとして初期化
+rm -rf .git
+git init
 ```
 
-### 2. Install Dependencies
+#### 2. 不要なサンプルファイルを削除
+
+```bash
+# サンプルノードとクレデンシャルを削除
+rm -rf nodes/ExampleNode
+rm -rf nodes/HttpBin
+rm -rf credentials/ExampleCredentialsApi.credentials.ts
+rm -rf credentials/HttpBinApi.credentials.ts
+```
+
+#### 3. 依存パッケージをインストール
 
 ```bash
 npm install
 ```
 
-This installs all required dependencies including the `@n8n/node-cli`.
+#### 4. package.json を編集
 
-### 3. Explore the Examples
+- `name`: パッケージ名（例: `n8n-nodes-pleasanter`）
+- `description`: 説明
+- `author`: 作成者情報
+- `repository`: リポジトリURL
+- `n8n.credentials`: クレデンシャルファイルのパス
+- `n8n.nodes`: ノードファイルのパス
 
-Browse the example nodes in [nodes/](nodes/) and [credentials/](credentials/) to understand the structure:
+#### 5. クレデンシャルの定義（`credentials/PleasanterApi.credentials.ts`）
 
-- Start with [nodes/Example/](nodes/Example/) for a basic node
-- Study [nodes/GithubIssues/](nodes/GithubIssues/) for a real-world implementation
+```typescript
+import type {
+    ICredentialType,
+    INodeProperties,
+} from 'n8n-workflow';
 
-### 4. Build Your Node
-
-Edit the example nodes to fit your use case, or create new node files by copying the structure from [nodes/Example/](nodes/Example/).
-
-> [!TIP]
-> If you want to scaffold a completely new node package, use `npm create @n8n/node` to start fresh with the CLI's interactive generator.
-
-### 5. Configure Your Package
-
-Update `package.json` with your details:
-
-- `name` - Your package name (must start with `n8n-nodes-`)
-- `author` - Your name and email
-- `repository` - Your repository URL
-- `description` - What your node does
-
-Make sure your node is registered in the `n8n.nodes` array.
-
-### 6. Develop and Test Locally
-
-Start n8n with your node loaded:
-
-```bash
-npm run dev
+export class PleasanterApi implements ICredentialType {
+    name = 'pleasanterApi';
+    displayName = 'Pleasanter API';
+    properties: INodeProperties[] = [
+        {
+            displayName: 'Base URL',
+            name: 'baseUrl',
+            type: 'string',
+            default: 'https://pleasanter.net',
+            required: true,
+        },
+        {
+            displayName: 'API Key',
+            name: 'apiKey',
+            type: 'string',
+            typeOptions: { password: true },
+            default: '',
+            required: true,
+        },
+    ];
+}
 ```
 
-This command runs `n8n-node dev` which:
+#### 3. ノードの実装（`nodes/pleasanter/Pleasanter.node.ts`）
 
-- Builds your node with watch mode
-- Starts n8n with your node available
-- Automatically rebuilds when you make changes
-- Opens n8n in your browser (usually http://localhost:5678)
+```typescript
+import type {
+    IExecuteFunctions,
+    INodeExecutionData,
+    INodeType,
+    INodeTypeDescription,
+} from 'n8n-workflow';
 
-You can now test your node in n8n workflows!
+export class Pleasanter implements INodeType {
+    description: INodeTypeDescription = {
+        displayName: 'Pleasanter',
+        name: 'pleasanter',
+        icon: 'file:pleasanter.svg',
+        group: ['transform'],
+        version: 1,
+        description: 'Interact with Pleasanter API',
+        defaults: { name: 'Pleasanter' },
+        inputs: ['main'],
+        outputs: ['main'],
+        credentials: [
+            { name: 'pleasanterApi', required: true },
+        ],
+        properties: [
+            // プロパティ定義
+        ],
+    };
 
-> [!NOTE]
-> Learn more about CLI commands in the [@n8n/node-cli documentation](https://www.npmjs.com/package/@n8n/node-cli).
+    async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+        // 実行ロジック
+    }
+}
+```
 
-### 7. Lint Your Code
+#### 4. package.json の設定
 
-Check for errors:
+```json
+{
+    "n8n": {
+        "n8nNodesApiVersion": 1,
+        "credentials": [
+            "dist/credentials/PleasanterApi.credentials.js"
+        ],
+        "nodes": [
+            "dist/nodes/pleasanter/Pleasanter.node.js"
+        ]
+    }
+}
+```
+
+#### 5. ビルドとテスト
 
 ```bash
+# ビルド
+npm run build
+
+# リント
 npm run lint
 ```
 
-Auto-fix issues when possible:
+### Docker 環境でのデプロイ
 
-```bash
-npm run lint:fix
+`docker-compose.yml` でカスタムノードをマウント:
+
+```yaml
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    environment:
+      - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom-nodes
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - /c/n8n/nodes:/home/node/.n8n/custom-nodes
 ```
 
-### 8. Build for Production
+## API リファレンス
 
-When ready to publish:
+- [Pleasanter API マニュアル](https://pleasanter.org/manual/api)
 
-```bash
-npm run build
-```
+## ライセンス
 
-This compiles your TypeScript code to the `dist/` folder.
-
-### 9. Prepare for Publishing
-
-Before publishing:
-
-1. **Update documentation**: Replace this README with your node's documentation. Use [README_TEMPLATE.md](README_TEMPLATE.md) as a starting point.
-2. **Update the LICENSE**: Add your details to the [LICENSE](LICENSE.md) file.
-3. **Test thoroughly**: Ensure your node works in different scenarios.
-
-### 10. Publish to npm
-
-Publish your package to make it available to the n8n community:
-
-```bash
-npm publish
-```
-
-Learn more about [publishing to npm](https://docs.npmjs.com/packages-and-modules/contributing-packages-to-the-registry).
-
-### 11. Submit for Verification (Optional)
-
-Get your node verified for n8n Cloud:
-
-1. Ensure your node meets the [requirements](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/):
-   - Uses MIT license ✅ (included in this starter)
-   - No external package dependencies
-   - Follows n8n's design guidelines
-   - Passes quality and security review
-
-2. Submit through the [n8n Creator Portal](https://creators.n8n.io/nodes)
-
-**Benefits of verification:**
-
-- Available directly in n8n Cloud
-- Discoverable in the n8n nodes panel
-- Verified badge for quality assurance
-- Increased visibility in the n8n community
-
-## Available Scripts
-
-This starter includes several npm scripts to streamline development:
-
-| Script                | Description                                                      |
-| --------------------- | ---------------------------------------------------------------- |
-| `npm run dev`         | Start n8n with your node and watch for changes (runs `n8n-node dev`) |
-| `npm run build`       | Compile TypeScript to JavaScript for production (runs `n8n-node build`) |
-| `npm run build:watch` | Build in watch mode (auto-rebuild on changes)                    |
-| `npm run lint`        | Check your code for errors and style issues (runs `n8n-node lint`) |
-| `npm run lint:fix`    | Automatically fix linting issues when possible (runs `n8n-node lint --fix`) |
-| `npm run release`     | Create a new release (runs `n8n-node release`)                   |
-
-> [!TIP]
-> These scripts use the [@n8n/node-cli](https://www.npmjs.com/package/@n8n/node-cli) under the hood. You can also run CLI commands directly, e.g., `npx n8n-node dev`.
-
-## Troubleshooting
-
-### My node doesn't appear in n8n
-
-1. Make sure you ran `npm install` to install dependencies
-2. Check that your node is listed in `package.json` under `n8n.nodes`
-3. Restart the dev server with `npm run dev`
-4. Check the console for any error messages
-
-### Linting errors
-
-Run `npm run lint:fix` to automatically fix most common issues. For remaining errors, check the [n8n node development guidelines](https://docs.n8n.io/integrations/creating-nodes/).
-
-### TypeScript errors
-
-Make sure you're using Node.js v22 or higher and have run `npm install` to get all type definitions.
-
-## Resources
-
-- **[n8n Node Documentation](https://docs.n8n.io/integrations/creating-nodes/)** - Complete guide to building nodes
-- **[n8n Community Forum](https://community.n8n.io/)** - Get help and share your nodes
-- **[@n8n/node-cli Documentation](https://www.npmjs.com/package/@n8n/node-cli)** - CLI tool reference
-- **[n8n Creator Portal](https://creators.n8n.io/nodes)** - Submit your node for verification
-- **[Submit Community Nodes Guide](https://docs.n8n.io/integrations/creating-nodes/deploy/submit-community-nodes/)** - Verification requirements and process
-
-## Contributing
-
-Have suggestions for improving this starter? [Open an issue](https://github.com/n8n-io/n8n-nodes-starter/issues) or submit a pull request!
-
-## License
-
-[MIT](https://github.com/n8n-io/n8n-nodes-starter/blob/master/LICENSE.md)
+MIT

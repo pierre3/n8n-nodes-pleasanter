@@ -9,6 +9,9 @@ services:
     environment:
       # カスタムノードのディレクトリを指定
       - N8N_CUSTOM_EXTENSIONS=/home/node/.n8n/custom-nodes
+    extra_hosts:
+      # ホストPCへのアクセス用（host.docker.internalが使えない場合のバックアップ）
+      - "host.docker.internal:host-gateway"
     volumes:
       - /c/n8n:/home/node/.n8n
       # カスタムノード用ボリューム
